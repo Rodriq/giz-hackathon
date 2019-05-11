@@ -1,0 +1,16 @@
+{
+  "name": "telecenter-cams",
+  "version": "1.0.0",
+  "description": "monitor env ina telecenter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rodriq",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "nedb": "^1.8.0",
+    "socket.io": "^2.2.0"
+  }
+}

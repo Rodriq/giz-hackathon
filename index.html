@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Telecentre Cam</title>
+</head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<body>
+	<div class="container-fluid">
+
+		<nav class="navbar bg-info">
+			<p class="float-left">LOGO</p>
+			<form class="form-inline">
+				<input class="form-control mr-sm-2" type="search" placeholder="Search Cam" aria-label="Search">
+				<button class="btn btn-outline-dark my-2 my-sm-0" type="submit">Search</button>
+			</form>
+		</nav>
+
+		<div class="container text-center">
+			<hr>
+			<a href="/chat.html">
+				<button type="button" id="chatZone" class="btn btn-primary btn-lg">Test Chat</button>
+			</a>
+			<a href="/cam.html">
+				<button type="button" id="camZone" class="btn btn-secondary btn-lg">Add as Camera</button>
+			</a>
+			<!-- <video autoplay="true" id="videoElement"></video> -->
+			<hr>
+		</div>
+	</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/web-socket.js"></script>
+<script>
+	function getUserMedia(options, successCallback, failureCallback) {
+		var api = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+		navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		if (api) {
+			return api.bind(navigator)(options, successCallback, failureCallback);
+		}
+	}
+
+	function getStream (type) {
+		if (!navigator.getUserMedia && !navigator.webkitGetUserMedia &&
+			!navigator.mozGetUserMedia && !navigator.msGetUserMedia) {
+			alert('User Media API not supported.');
+		return;
+	}
+
+	var constraints = {};
+	constraints[type] = true;
+	getUserMedia(constraints, function (stream) {
+		var mediaControl = document.querySelector(type);
+
+		if ('srcObject' in mediaControl) {
+			mediaControl.srcObject = stream;
+			mediaControl.src = (window.URL || window.webkitURL).createObjectURL(stream);
+		} else if (navigator.mozGetUserMedia) {
+			mediaControl.mozSrcObject = stream;
+		}
+	}, function (err) {
+		alert('Error: ' + err);
+	});
+}
+</script>
+</html>

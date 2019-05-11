@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Telecentre Cam</title>
+</head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<body>
+	<div class="container-fluid">
+
+		<nav class="navbar bg-info">
+			<p class="float-left">LOGO</p>
+			<form class="form-inline">
+				<input class="form-control mr-sm-2" type="search" placeholder="Search Chat" aria-label="Search">
+				<button class="btn btn-outline-dark my-2 my-sm-0" type="submit">Search</button>
+			</form>
+		</nav>
+
+		<div class="container">
+			<hr>
+			<div id="namePosition">
+				<input class="chat-name" type="text" placeholder="Enter your chat handle (name)" autofocus>
+				<button class="join-chat primary">Connect</button>
+			</div>
+			<div id="chatposition">
+				<div id="text-position">
+					<ul id="messages">
+					</ul>
+					<p id="stat"></p>
+				</div>
+				<hr>
+				<div id="active-position" class="right">
+					<p id="active">
+				<!-- <ul>
+					
+				</ul> -->	
+			</p>
+		</div>
+		<div id="shift">
+			<form action="">
+				<input type="text" id="m" placeholder="Type message...">
+				<button>Send</button>
+			</form>
+		</div>
+	</div>
+    <!-- 
+	<ul id="messages"></ul>
+	<form action="">
+		<input id="m" autocomplete="off" />
+		<button>Send</button>
+	</form> -->
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	$(function() {
+		var socket = io();
+		$('.join-chat').click(() => {
+		// Hide name field
+		socket.emit('name registered', $('.chat-name').val());
+		$('#namePosition').hide();
+		$('#chatposition').show();
+
+	})
+		// load Active Users
+		setInterval(function () {
+			socket.emit('activeUsers')
+		}, 5000 );
+		socket.on('activeUsers', function (users) {
+			// console.log(users);
+			$('#active').text('');
+			for (var i = 0; i < users.length; i++) {
+				console.log(users[i]);
+				$('#active').append($('<li id="me">').text(users[i]));
+			}
+		})
+
+
+    // When Messaged is send
+    $('form').submit(function(e) {
+    	e.preventDefault();
+    	var typedMsg = $('#m').val();
+        // emits a 'chat message' broadcast
+        socket.emit('chat message', typedMsg);
+        $('#m').val('');
+        return false;
+    });
+
+    // Listen to a 'chat message' broadcast then displays message
+    socket.on('chat message', function(msg) {
+    	console.log(msg.name, socket.userName);
+    	console.log(socket)
+    	if (msg.id == socket.id) {
+    		$('#messages').append($('<li class="right">').text(msg.message)).append($('<p id="me">').text(msg.name));   
+    	} else {
+
+    		$('#messages').append($('<li>').text(msg.message)).append($('<p id="me">').text(msg.name));
+    	}
+    });
+
+    // While User is typing
+    $('#m').on('keyup', (e) => {
+
+    	if (e.which >= 49 && e.which <= 90) {
+    		console.log(e.which)
+    		socket.emit('stat', 'is typing');		// send a broadcast
+    	}
+    });
+
+    // Listens to a stat broadcast
+    socket.on('stat', function(stat) {
+    	console.log(stat)
+    	$('#stat').text(`${stat.user}  ${stat.typ}`);
+    	setTimeout(function() {
+    		$('#stat').text('');
+    	}, 1500);
+    })
+
+});
+</script>
+</html>

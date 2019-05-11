@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Telecentre Cam</title>
+</head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<body>
+	<div class="container-fluid">
+
+		<nav class="navbar bg-info">
+			<p class="float-left">LOGO</p>
+			<form class="form-inline">
+				<input class="form-control mr-sm-2" type="search" placeholder="Search Cam" aria-label="Search">
+				<button class="btn btn-outline-dark my-2 my-sm-0" type="submit">Search</button>
+			</form>
+		</nav>
+
+		<div class="container">
+			<hr>
+			<span id="camNamePanel" class="text-center">
+				<div class="form-row">
+					<div class="col">
+						<input type="text" id="camName" class="form-control" placeholder="Enter area name" autofocus required>
+					</div>
+					<div class="col-auto">
+						<button type="button" id="getCamName" class="btn btn-info">Confirm</button>
+					</div>
+				</div>
+			</span><br>
+
+			<div id="camsPosition" class="contianer invisible">
+
+				<!-- <div id="allCams" class="card-group"> -->
+					<div id="allCams" class="row">
+						<div class="col-sm-4">
+							<div class="card border-info mb-3" style="max-width: 20rem; max-height: 30rem;">
+								<div class="card-header">
+									<span class="text-center text-justify font-weight-bold" id="camNamePosition">Cam Name	
+									</span> 
+									&nbsp;
+									<span class="float-right">
+										Live: <span id="liveTime" class="text-danger">00:00</span>
+									</span>
+								</div>
+								<div class="card-body text-info text-justify text-center">
+									<video autoplay="true" id="videoElement" style="width: auto; max-width: 17rem;">
+
+									</video>
+								</div>
+								<div class="card-footer bg-transparent border-dark">Footer</div>
+							</div>
+						</div>
+					</div>
+					<!-- </div> -->
+				</div>
+
+			</div>
+		</div>
+	</body>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/web-socket.js"></script>
+	<script>
+		$(function (){
+			$('#camsPosition').hide();
+			var socket = io();
+
+			function getUserMedia(options, successCallback, failureCallback) {
+				var api = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+				navigator.mozGetUserMedia || navigator.msGetUserMedia;
+				if (api) {
+					return api.bind(navigator)(options, successCallback, failureCallback);
+				}
+			}
+
+			function getStream (type) {
+				if (!navigator.getUserMedia && !navigator.webkitGetUserMedia &&
+					!navigator.mozGetUserMedia && !navigator.msGetUserMedia) {
+					alert('User Media API not supported.');
+				return;
+			}
+
+			var constraints = {};
+			constraints[type] = true;
+			getUserMedia(constraints, function (stream) {
+				var mediaControl = document.querySelector(type);
+
+				// socket.emmit('sendVideo', 'stream');
+				if ('srcObject' in mediaControl) {
+					// setInterval(function () {
+					// }, 3000);
+					mediaControl.srcObject = stream;
+					mediaControl.src = (window.URL || window.webkitURL).createObjectURL(stream);
+
+					// var media = new MediaRecorder(stream);
+					// media.ondataavailable = function (e) {
+						// socket.emit('sendVideo', e.data);
+						console.log('**********')
+						console.log(mediaControl.src);
+					// }
+
+				} else if (navigator.mozGetUserMedia) {
+					mediaControl.mozSrcObject = stream;
+				}
+			}, function (err) {
+				alert('Error: ' + err);
+			});
+		}
+
+		$('#getCamName').click((e) => {
+			e.preventDefault();
+			var camName = $('#camName').val();
+			console.log(camName);
+			$('#camsPosition').attr('class', 'contianer visible');
+			$('#camsPosition').show();
+			$('#camNamePanel').hide();
+			$('#camNamePosition').text(camName);
+
+			socket.emit('cameraRequest', camName);
+		});
+
+		socket.on('newCamera', function(prop) {
+			console.log(prop);
+			if (prop.id == socket.id) {
+				// alert(`${prop.camName} has joined`)
+
+				var video = $('#videoElement');
+				// getStream('video');
+				if (navigator.mediaDevices.getUserMedia) {
+					navigator.mediaDevices.getUserMedia({video: true})
+					.then(function (stream) {
+						console.log(stream);
+						video.srcObject = stream;
+					})
+					.catch(function (err) {
+						console.log(err);
+					});
+				}
+			}
+			
+			if (socket.id == prop.admin) {
+				console.log('I AM THE ADMIN');
+				$('#allCams').append(`
+					<div class="col-sm-4">
+					<div class="card border-info mb-3" style="max-width: 20rem; max-height: 30rem;">
+					<div class="card-header">
+					<span class="text-center text-justify font-weight-bold" id="camNamePosition">${prop.camName}	
+					</span> 
+					&nbsp;
+					<span class="float-right">
+					Live: <span id="liveTime" class="text-danger">00:00</span>
+					</span>
+					</div>
+					<div class="card-body text-info text-justify text-center">
+					<video autoplay="true" id="videoElement" class="bg-dark" style="width: auto; max-width: 17rem;">
+
+					</video>
+					</div>
+					<div class="card-footer bg-transparent border-dark">Footer</div>
+					</div>
+					</div>`)
+			}
+
+		});
+	})
+</script>
+</html>
