@@ -8,6 +8,7 @@ let db = require('./store');
 
 app.use(express.static('public'));
 
+const users = [];
 
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/index.html');
@@ -68,17 +69,55 @@ io.on('connection', function(socket){
 		})
 
 	});
-	
+
 	socket.on('sendVideo', function(vid) {
 		console.log(vid);
 	});
 
-	socket.on('disconnect', function(){
-		console.log('user disconnected');
-		db.cameras.remove({id: socket.id}, {}, (err, removed) => {
-			return removed;
-		})
+	// FOR CHAT
+	
+
+	socket.on('name registered', function(name) {
+		socket.userName = name;
+		users.push(socket.userName);
+		socket.broadcast.emit('stat', { user: socket.userName, typ: 'joined group' })
+		console.log(socket.userName);
+		console.log(users);
 	});
+
+	socket.on('activeUsers', function() {
+		io.emit('activeUsers', users);
+	})
+
+
+	socket.on('chat message', function(msg) {
+		console.log('message:', {
+			message: msg,
+			name: socket.userName,
+			id: socket.id,
+		});
+
+        // Brodcast to everyone
+        io.emit('chat message', {
+        	message: msg,
+        	name: socket.userName,
+        	id: socket.id,
+        });
+    });
+
+	socket.on('stat', function(typ) {
+		console.log(typ)
+		socket.broadcast.emit('stat', { typ, user: socket.userName })
+	});
+	
+// END CHAT
+
+socket.on('disconnect', function(){
+	console.log('user disconnected');
+	db.cameras.remove({id: socket.id}, {}, (err, removed) => {
+		return removed;
+	})
+});
 });
 
 http.listen(port, () => console.log(`Listening on port *:${port}`));

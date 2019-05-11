@@ -94,11 +94,11 @@
 					// }, 3000);
 					mediaControl.srcObject = stream;
 					mediaControl.src = (window.URL || window.webkitURL).createObjectURL(stream);
-
+					console.log(stream);
+					console.log('**********')
 					// var media = new MediaRecorder(stream);
 					// media.ondataavailable = function (e) {
 						// socket.emit('sendVideo', e.data);
-						console.log('**********')
 						console.log(mediaControl.src);
 					// }
 
@@ -127,18 +127,8 @@
 			if (prop.id == socket.id) {
 				// alert(`${prop.camName} has joined`)
 
-				var video = $('#videoElement');
-				// getStream('video');
-				if (navigator.mediaDevices.getUserMedia) {
-					navigator.mediaDevices.getUserMedia({video: true})
-					.then(function (stream) {
-						console.log(stream);
-						video.srcObject = stream;
-					})
-					.catch(function (err) {
-						console.log(err);
-					});
-				}
+				// var video = $('#videoElement');
+				getStream('video');
 			}
 			
 			if (socket.id == prop.admin) {

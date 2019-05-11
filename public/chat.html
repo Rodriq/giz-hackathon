@@ -17,14 +17,22 @@
 			</form>
 		</nav>
 
-		<div class="container">
+		<div class="container text-center">
 			<hr>
 			<div id="namePosition">
-				<input class="chat-name" type="text" placeholder="Enter your chat handle (name)" autofocus>
-				<button class="join-chat primary">Connect</button>
+				<input class="chat-name form-control mr-sm-2 col-md-5" type="text" placeholder="Enter your chat handle (name)" autofocus> &nbsp;
+				<button class="join-chat btn btn-outline-primary">Connect</button>
 			</div>
-			<div id="chatposition">
-				<div id="text-position">
+			<div class="row">
+				<div class="col-md bg-primary">
+					<div id="chatposition" class="border-dark" style="width: 80%;
+					height: 600px;
+					border-radius: 17px;
+					padding: 10px;
+					margin-left: 4%;">
+					<div id="text-position" style="overflow: auto;
+					height: 400px;
+					scroll-behavior: auto;">
 					<ul id="messages">
 					</ul>
 					<p id="stat"></p>
@@ -32,16 +40,16 @@
 				<hr>
 				<div id="active-position" class="right">
 					<p id="active">
-				<!-- <ul>
-					
-				</ul> -->	
-			</p>
-		</div>
-		<div id="shift">
-			<form action="">
-				<input type="text" id="m" placeholder="Type message...">
-				<button>Send</button>
-			</form>
+
+					</p>
+				</div>
+				<div id="shift">
+					<form action="">
+						<input type="text" id="m" placeholder="Type message...">
+						<button>Send</button>
+					</form>
+				</div>
+			</div>
 		</div>
 	</div>
     <!-- 
@@ -50,6 +58,8 @@
 		<input id="m" autocomplete="off" />
 		<button>Send</button>
 	</form> -->
+</div>
+</div>
 </body>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
@@ -57,6 +67,7 @@
 <script>
 	$(function() {
 		var socket = io();
+		$('#chatposition').hide();
 		$('.join-chat').click(() => {
 		// Hide name field
 		socket.emit('name registered', $('.chat-name').val());
